@@ -52,6 +52,8 @@ logSrcPreDefName = [
 # 主中断频率
 IsrFreq = 40e3
 
+#比特率
+cdbBitrate=canlib.Bitrate.BITRATE_1M
 
 def setupVarDict():
     global varDict
@@ -702,7 +704,7 @@ def readMCUVarUtil(namex):
             ch = canlib.openChannel(
                 channel=0,
                 flags=canlib.Open.EXCLUSIVE | canlib.Open.ACCEPT_VIRTUAL,
-                bitrate=canlib.Bitrate.BITRATE_500K,
+                bitrate=cdbBitrate,
             )
             ch.setBusOutputControl(canlib.Driver.NORMAL)
             ch.busOn()
@@ -738,7 +740,7 @@ def readMCUVarUtil(namex):
         ch = canlib.openChannel(
             channel=0,
             flags=canlib.Open.EXCLUSIVE | canlib.Open.ACCEPT_VIRTUAL,
-            bitrate=canlib.Bitrate.BITRATE_500K,
+            bitrate=cdbBitrate,
         )
         ch.setBusOutputControl(canlib.Driver.NORMAL)
         ch.busOn()
@@ -781,7 +783,7 @@ def setMCUVarUtil(namex, val):
             ch = canlib.openChannel(
                 channel=0,
                 flags=canlib.Open.EXCLUSIVE | canlib.Open.ACCEPT_VIRTUAL,
-                bitrate=canlib.Bitrate.BITRATE_500K,
+                bitrate=cdbBitrate,
             )
             ch.setBusOutputControl(canlib.Driver.NORMAL)
             ch.busOn()
@@ -822,7 +824,7 @@ def setMCUVarUtil(namex, val):
         ch = canlib.openChannel(
             channel=0,
             flags=canlib.Open.EXCLUSIVE | canlib.Open.ACCEPT_VIRTUAL,
-            bitrate=canlib.Bitrate.BITRATE_500K,
+            bitrate=cdbBitrate,
         )
         ch.setBusOutputControl(canlib.Driver.NORMAL)
         ch.busOn()
@@ -879,7 +881,7 @@ def setTrigConf():
     ch = canlib.openChannel(
         channel=0,
         flags=canlib.Open.EXCLUSIVE | canlib.Open.ACCEPT_VIRTUAL,
-        bitrate=canlib.Bitrate.BITRATE_500K,
+        bitrate=cdbBitrate,
     )
     ch.setBusOutputControl(canlib.Driver.NORMAL)
     ch.busOn()
@@ -975,7 +977,7 @@ def dumpBuff():
     ch = canlib.openChannel(
         channel=0,
         flags=canlib.Open.EXCLUSIVE | canlib.Open.ACCEPT_VIRTUAL,
-        bitrate=canlib.Bitrate.BITRATE_500K,
+        bitrate=cdbBitrate,
     )
     ch.setBusOutputControl(canlib.Driver.NORMAL)
     ch.busOn()
@@ -1078,7 +1080,7 @@ if __name__ == "__main__":
     ch = canlib.openChannel(
         channel=0,
         flags=canlib.Open.EXCLUSIVE | canlib.Open.ACCEPT_VIRTUAL,
-        bitrate=canlib.Bitrate.BITRATE_500K,
+        bitrate=cdbBitrate,
     )
     ch.setBusOutputControl(canlib.Driver.NORMAL)
     ch.busOn()
