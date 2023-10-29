@@ -52,17 +52,20 @@ class mainWindow(QtWidgets.QMainWindow, Ui_mainWin.Ui_MainWindow):
         self.isComModeOn = 0
 
     def btnSlot(self):
+        global ch
         if (self.isComModeOn):
             # 已经是打开状态，开始关闭
             self.isComModeOn = 0
-            self.pushButton.setText("start->stop")
+            self.pushButton.setText("stop->start")
             self.timer.stop()
+            ch.busOff()
 
         else:
             # 关闭状态，打开
             self.isComModeOn = 1
-            self.pushButton.setText("stop->start")
+            self.pushButton.setText("start->stop")
             self.timer.start(self.spinBox.value())
+            ch.busOn()
 
     def updateTxCmd(self):
         global SG_cmd
@@ -121,52 +124,66 @@ def revStatusUtil():
     global rxCnt1
     global rxCnt2
 
-    try:
-        frame = ch.read(timeout=50)
-        if (frame.flags != canlib.MessageFlag.EXT or frame.dlc != 8):
-            print(datetime.datetime.now().strftime(
-                '[%H:%M:%S.%f]')+" frame no recv!")
-        else:
-            if (frame.id == 0x0C101070):
-                # 帧1
-                rxCnt1 += 1
-                rxFrameDecStr1 = datetime.datetime.now().strftime(
-                    '[%H:%M:%S.%f]')+"\tcnt1:\t"+str(rxCnt1)+"\r\n"
-                rxFrameDecStr1 += "1.1-spd:{}\t".format(
-                    struct.unpack("<H", frame.data[0:2])[0])
-                rxFrameDecStr1 += "1.2-Udc:{}\t".format(
-                    struct.unpack("<H", frame.data[2:4])[0]*0.1)
-                rxFrameDecStr1 += "1.3-Idc:{}\r\n".format(
-                    struct.unpack("<H", frame.data[4:6])[0]*0.1-100)
-                rxFrameDecStr1 += "1.4-Tmotor:{}\t".format(
-                    struct.unpack("<B", frame.data[6:7])[0]-30)
-                rxFrameDecStr1 += "1.5-Tpower:{}\t".format(
-                    struct.unpack("<B", frame.data[7:8])[0]-30)
+    revCnt = 0
 
-            elif (frame.id == 0x14201070):
-                # 帧2
-                rxCnt2 += 1
-                rxFrameDecStr2 = datetime.datetime.now().strftime(
-                    '[%H:%M:%S.%f]')+"\tcnt2:\t"+str(rxCnt2)+"\r\n"
-                rxFrameDecStr2 += "2.1-Is:{}\t".format(
-                    struct.unpack("<B", frame.data[0:1])[0]-100)
-                rxFrameDecStr2 += "2.2-Iq:{}\t".format(
-                    struct.unpack("<B", frame.data[1:2])[0]-100)
-                rxFrameDecStr2 += "2.3-Id:{}\r\n".format(
-                    struct.unpack("<B", frame.data[2:3])[0]-100)
-                rxFrameDecStr2 += "2.4-Te:{}\t".format(
-                    struct.unpack("<B", frame.data[3:4])[0]*0.1-11)
-                rxFrameDecStr2 += "2.5-Pdc:{}\t".format(
-                    struct.unpack("<B", frame.data[4:5])[0]-30)
-                rxFrameDecStr2 += "2.5-Tctrl:{}\r\n".format(
-                    struct.unpack("<B", frame.data[5:6])[0]-30)
-                rxFrameDecStr2 += "2.6-errFlg:\t" + \
-                    str(frame.data[6:7])+str(frame.data[7:8])
+    while (1):
 
-    except Exception as e:
-        print(datetime.datetime.now().strftime(
-            '[%H:%M:%S.%f]')+" rev fail!")
-        print(e)
+        try:
+            frame = ch.read(timeout=20)
+            revCnt += 1
+            if (frame.flags != canlib.MessageFlag.EXT or frame.dlc != 8):
+                print(datetime.datetime.now().strftime(
+                    '[%H:%M:%S.%f]')+" frame type err!")
+            else:
+                if (frame.id == 0x0C101070):
+                    # 帧1
+                    rxCnt1 += 1
+                    rxFrameDecStr1 = datetime.datetime.now().strftime(
+                        '[%H:%M:%S.%f]')+"\tcnt1:\t"+str(rxCnt1)+"\r\n"
+                    rxFrameDecStr1 += "1.1-spd:\t{:.2f}\r\n".format(
+                        struct.unpack("<H", frame.data[0:2])[0])
+                    rxFrameDecStr1 += "1.2-Udc:\t{:.2f}\r\n".format(
+                        struct.unpack("<H", frame.data[2:4])[0]*0.1)
+                    rxFrameDecStr1 += "1.3-Idc:\t{:.2f}\r\n".format(
+                        struct.unpack("<H", frame.data[4:6])[0]*0.1-100)
+                    rxFrameDecStr1 += "1.4-Tmotor:\t{:.2f}\r\n".format(
+                        struct.unpack("<B", frame.data[6:7])[0]-30)
+                    rxFrameDecStr1 += "1.5-Tpower:\t{:.2f}\r\n".format(
+                        struct.unpack("<B", frame.data[7:8])[0]-30)
+
+                elif (frame.id == 0x14201070):
+                    # 帧2
+                    rxCnt2 += 1
+                    rxFrameDecStr2 = datetime.datetime.now().strftime(
+                        '[%H:%M:%S.%f]')+"\tcnt2:\t"+str(rxCnt2)+"\r\n"
+                    rxFrameDecStr2 += "2.1-Is:\t{:.2f}\r\n".format(
+                        struct.unpack("<B", frame.data[0:1])[0]-100)
+                    rxFrameDecStr2 += "2.2-Iq:\t{:.2f}\r\n".format(
+                        struct.unpack("<B", frame.data[1:2])[0]-100)
+                    rxFrameDecStr2 += "2.3-Id:\t{:.2f}\r\n".format(
+                        struct.unpack("<B", frame.data[2:3])[0]-100)
+                    rxFrameDecStr2 += "2.4-Te:\t{:.2f}\r\n".format(
+                        struct.unpack("<B", frame.data[3:4])[0]*0.1-11)
+                    rxFrameDecStr2 += "2.5-Pdc:\t{:.2f}\r\n".format(
+                        struct.unpack("<B", frame.data[4:5])[0]-30)
+                    rxFrameDecStr2 += "2.5-Tctrl:\t{:.2f}\r\n".format(
+                        struct.unpack("<B", frame.data[5:6])[0]-30)
+                    rxFrameDecStr2 += "2.6-errFlg:\t0x" + \
+                        str(frame.data[6:7].hex())+" 0x" + \
+                        str(frame.data[7:8].hex())
+
+                else:
+                    print(datetime.datetime.now().strftime(
+                        '[%H:%M:%S.%f]')+" frame Id err!")
+
+        except Exception as e:
+            if (revCnt):
+                break
+            else:
+                print(datetime.datetime.now().strftime(
+                    '[%H:%M:%S.%f]')+" rev fail!")
+                print(e)
+                break
 
 
 # 设置变量的辅助函数
@@ -183,7 +200,7 @@ def sendCmdUtil():
         txFrame = Frame(id_=0x04107010, data=txFrameData, dlc=8,
                         flags=canlib.MessageFlag.EXT)
         ch.write(txFrame)
-        ch.writeSync(timeout=50)
+        ch.writeSync(timeout=20)
 
     except Exception as e:
         print(datetime.datetime.now().strftime(
@@ -205,7 +222,7 @@ if __name__ == "__main__":
         bitrate=cdbBitrate,
     )
     ch.setBusOutputControl(canlib.Driver.NORMAL)
-    ch.busOn()
+    # ch.busOn()
 
     app = QtWidgets.QApplication(sys.argv)
     fontx = QtGui.QFont()
@@ -217,7 +234,8 @@ if __name__ == "__main__":
 
     ret = app.exec()
 
-    ch.busOff()
+    if (w.isComModeOn):
+        ch.busOff()
     ch.close()
 
     sys.exit(ret)

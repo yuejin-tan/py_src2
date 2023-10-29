@@ -72,7 +72,7 @@ class Ui_MainWindow(object):
         self.horizontalLayout_2.addWidget(self.label_3)
         self.spinBox = QtWidgets.QSpinBox(self.centralwidget)
         self.spinBox.setMaximum(3000)
-        self.spinBox.setProperty("value", 100)
+        self.spinBox.setProperty("value", 110)
         self.spinBox.setObjectName("spinBox")
         self.horizontalLayout_2.addWidget(self.spinBox)
         self.pushButton = QtWidgets.QPushButton(self.centralwidget)
