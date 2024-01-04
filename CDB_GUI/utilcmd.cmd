@@ -8,6 +8,8 @@ pip install pyqt5-stubs
 
 @REM 新建环境
 
+conda remove -n xxxxx(名字) --all
+
 conda update -n base -c defaults conda
 
 conda create -n can_dev
